@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EPS & P/E Forecaster</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>📈 EPS & P/E Forecaster</h1>
+
+    <form id="forecast-form">
+      <label>EPS actuel ($): <input type="number" id="eps" step="0.01" required></label>
+      <label>Année de départ: <input type="number" id="year" value="2025" required></label>
+      <label>Croissance annuelle (%) : <input type="number" id="growth" step="0.1" required></label>
+      <label>Prix d'entrée (séparés par ,): 
+        <input type="text" id="prices" placeholder="175,160,140" required>
+      </label>
+      <label>Projection (années): <input type="number" id="years" value="10" required></label>
+      <button type="submit">Générer la projection</button>
+    </form>
+
+    <div class="charts">
+      <canvas id="epsChart"></canvas>
+      <canvas id="peChart"></canvas>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
