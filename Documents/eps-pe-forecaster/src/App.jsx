@@ -23,25 +23,19 @@ const fmt = (n: number, opts: Intl.NumberFormatOptions = {}) =>
 function buildProjectionData({
   startYear,
   currentEPS,
-  growthPct,
+  growthPct, // e.g. 15 for 15%
   entryPrices,
   maxYears,
-}: {
-  startYear: number;
-  currentEPS: number;
-  growthPct: number; // e.g. 15 for 15%
-  entryPrices: number[];
-  maxYears: number;
 }) {
   const g = 1 + growthPct / 100;
   const rows = Array.from({ length: maxYears + 1 }, (_, i) => {
     const year = startYear + i;
     const eps = currentEPS * Math.pow(g, i);
-    const base: Record<string, number> = {
+    const base = {
       year,
       t: i, // t = years from now
       eps,
-    } as any;
+    };
 
     entryPrices.forEach((p, idx) => {
       base[`pe_${idx}`] = p / eps;
