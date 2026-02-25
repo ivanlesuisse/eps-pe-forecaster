@@ -1,9 +1,22 @@
-📈 EPS & P/E Forecaster
+# Swiss FinTrack
 
-live here ->[ https://eps-pe-forecaster-small.vercel.app/](https://eps-pe-forecaster-xp5v.vercel.app/)
+Swiss FinTrack is a financial dashboard built with Next.js, Prisma, and Clerk. It includes secure IBKR OAuth 1.0a integration, portfolio syncing, and audit logging.
 
-forecast EPS with a fixed growth % to help me visualize future P/E and stock prices
+## Quick Start
 
-<img width="911" height="819" alt="image" src="https://github.com/user-attachments/assets/20499d36-8844-468b-bc7c-460dda7d72ac" />
-<img width="928" height="359" alt="image" src="https://github.com/user-attachments/assets/c6d8575a-b7e4-4c7a-9a0a-6dae650b1775" />
+```bash
+npm install
+npm run dev
+```
 
+Open http://localhost:3000 in your browser.
+
+## IBKR Setup
+
+Follow the step-by-step guide in [IBKR_QUICKSTART.md](IBKR_QUICKSTART.md).
+
+## Useful Docs
+
+- [IBKR_IMPLEMENTATION.md](IBKR_IMPLEMENTATION.md)
+- [IBKR_STATUS.md](IBKR_STATUS.md)
+- [TO-DO.md](TO-DO.md)

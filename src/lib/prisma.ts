@@ -1,0 +1,11 @@
+// @ts-expect-error - Prisma client types are dynamically generated
+import { PrismaClient } from "@prisma/client";
+
+// Prevents multiple instances of Prisma Client in development
+const globalForPrisma = global as unknown as { prisma: PrismaClient };
+
+export const prisma: PrismaClient =
+  globalForPrisma.prisma ||
+  new PrismaClient();
+
+if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
