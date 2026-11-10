@@ -1,4 +1,3 @@
-// @ts-expect-error - Prisma client types are dynamically generated
 import { PrismaClient } from "@prisma/client";
 
 // Prevents multiple instances of Prisma Client in development

@@ -138,7 +138,7 @@ export async function POST(request: NextRequest) {
     const accountBundles = bundle.accounts || [];
 
     const normalizedPositions = accountBundles.flatMap((account) =>
-      (account.positions || []).map((position) => ({
+      (account.positions || []).map((position: RawPosition) => ({
         accountId: account.accountId,
         ...normalizePosition(position),
       }))

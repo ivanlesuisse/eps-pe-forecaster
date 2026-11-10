@@ -1,3 +1,5 @@
+import { finiteNumber, optionalNumber, requiredText, InvalidAssetInput } from "@/lib/asset-input";
+import { getOrCreateUserByClerkId } from "@/lib/users";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
@@ -18,25 +20,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get or create user
-    let user = await prisma.user.findUnique({
-      where: { clerkId: userId },
-    });
-
-    if (!user) {
-      console.log("User not found, creating new user");
-      user = await prisma.user.create({
-        data: {
-          clerkId: userId,
-          // Keep a unique placeholder email until profile sync is implemented.
-          email: `${userId}@clerk.local`,
-          baseCurrency: "CHF",
-        },
-      });
-      console.log("User created:", user.id);
-    } else {
-      console.log("User found:", user.id);
-    }
+    const user = await getOrCreateUserByClerkId(userId);
 
     const body = await request.json();
     const {
@@ -53,27 +37,17 @@ export async function POST(request: NextRequest) {
 
     console.log("Creating asset:", { name, type, value });
 
-    const parsedValue = Number(value);
-    const parsedQuantity = quantity !== undefined && quantity !== null && quantity !== ""
-      ? Number(quantity)
-      : null;
-    const parsedBuyingPrice = buyingPrice !== undefined && buyingPrice !== null && buyingPrice !== ""
-      ? Number(buyingPrice)
-      : null;
-
-    if (!name || !type || !Number.isFinite(parsedValue)) {
-      console.log("Missing required fields");
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 }
-      );
-    }
+    const parsedValue = finiteNumber(value, "value");
+    const parsedQuantity = optionalNumber(quantity, "quantity");
+    const parsedBuyingPrice = optionalNumber(buyingPrice, "buyingPrice");
+    const parsedName = requiredText(name, "name");
+    const parsedType = requiredText(type, "type");
 
     const asset = await prisma.asset.create({
       data: {
         userId: user.id,
-        name,
-        type,
+        name: parsedName,
+        type: parsedType,
         category: category || type,
         institution: institution || "",
         value: parsedValue,
@@ -87,9 +61,12 @@ export async function POST(request: NextRequest) {
     console.log("Asset created:", asset.id);
     return NextResponse.json(asset, { status: 201 });
   } catch (error) {
+    if (error instanceof InvalidAssetInput || error instanceof SyntaxError) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
     console.error("Error creating asset:", error);
     return NextResponse.json(
-      { error: "Failed to create asset", details: (error as Error).message },
+      { error: "Failed to create asset" },
       { status: 500 }
     );
   }
@@ -100,7 +77,7 @@ export async function GET() {
     console.log("GET /api/assets - Starting request");
     // Try alternative Clerk auth pattern
     const authSession = await auth();
-    console.log("Full auth session:", { authSession, keys: Object.keys(authSession || {}) });
+
     
     const userId = authSession?.userId;
     
@@ -109,7 +86,7 @@ export async function GET() {
     if (!userId) {
       console.log("No userId found in auth");
       return NextResponse.json(
-        { error: "Unauthorized - no userId", debug: { authSession } },
+        { error: "Unauthorized - no userId" },
         { status: 401 }
       );
     }
@@ -137,7 +114,7 @@ export async function GET() {
   } catch (error) {
     console.error("Error fetching assets:", error);
     return NextResponse.json(
-      { error: "Failed to fetch assets", details: (error as Error).message },
+      { error: "Failed to fetch assets" },
       { status: 500 }
     );
   }

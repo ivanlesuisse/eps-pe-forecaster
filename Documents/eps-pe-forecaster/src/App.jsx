@@ -13,7 +13,7 @@ import {
 } from "recharts";
 
 // Small helper to format numbers nicely
-const fmt = (n: number, opts: Intl.NumberFormatOptions = {}) =>
+const fmt = (n, opts = {}) =>
   new Intl.NumberFormat(undefined, {
     maximumFractionDigits: 2,
     ...opts,
@@ -47,16 +47,16 @@ function buildProjectionData({
 
 export default function ForecastEPSPERatio() {
   // Defaults from the user's example
-  const [currentPrice, setCurrentPrice] = useState<number>(175);
-  const [currentEPS, setCurrentEPS] = useState<number>(3);
-  const [growthPct, setGrowthPct] = useState<number>(15);
-  const [entryPrices, setEntryPrices] = useState<number[]>([175, 160]);
+  const [currentPrice, setCurrentPrice] = useState(175);
+  const [currentEPS, setCurrentEPS] = useState(3);
+  const [growthPct, setGrowthPct] = useState(15);
+  const [entryPrices, setEntryPrices] = useState([175, 160]);
 
   // Which horizons to show in the summary table
-  const [horizons, setHorizons] = useState<number[]>([1, 3, 5, 10]);
+  const [horizons, setHorizons] = useState([1, 3, 5, 10]);
 
   // Max chart horizon in years
-  const [maxYears, setMaxYears] = useState<number>(10);
+  const [maxYears, setMaxYears] = useState(10);
 
   const startYear = new Date().getFullYear();
 
@@ -73,15 +73,15 @@ export default function ForecastEPSPERatio() {
   );
 
   const addEntryPrice = () => setEntryPrices((arr) => [...arr, currentPrice]);
-  const removeEntryPrice = (idx: number) =>
+  const removeEntryPrice = (idx) =>
     setEntryPrices((arr) => arr.filter((_, i) => i !== idx));
 
-  const updateEntryPrice = (idx: number, value: number) =>
+  const updateEntryPrice = (idx, value) =>
     setEntryPrices((arr) => arr.map((v, i) => (i === idx ? value : v)));
 
   const horizonSet = new Set(horizons);
 
-  const peColor = (idx: number) => {
+  const peColor = (idx) => {
     const palette = [
       "#2563eb",
       "#ef4444",
@@ -159,7 +159,7 @@ export default function ForecastEPSPERatio() {
           </div>
 
           <div className="bg-white rounded-2xl shadow-sm p-4">
-            <div className="text-sm font-medium mb-2">Prix d'entrée & P/E actuel</div>
+            <div className="text-sm font-medium mb-2">Prix d&apos;entrée & P/E actuel</div>
             <div className="flex gap-2 items-end mb-3">
               <label className="flex-1">
                 <span className="text-xs text-neutral-600">Prix courant ($)</span>
@@ -214,7 +214,7 @@ export default function ForecastEPSPERatio() {
                 </div>
               ))}
               {entryPrices.length === 0 && (
-                <div className="text-xs text-neutral-500">Ajoutez un ou plusieurs prix d'entrée.</div>
+                <div className="text-xs text-neutral-500">Ajoutez un ou plusieurs prix d&apos;entrée.</div>
               )}
             </div>
           </div>
@@ -240,7 +240,7 @@ export default function ForecastEPSPERatio() {
               ))}
             </div>
             <p className="text-xs text-neutral-500 mt-2">
-              Le graphique affiche tous les pas annuels jusqu'à l'horizon choisi, tandis que le tableau résume 
+              Le graphique affiche tous les pas annuels jusqu&apos;à l&apos;horizon choisi, tandis que le tableau résume
               {" "}
               1, 3, 5, 10 ans (sélection multiples possibles).
             </p>
@@ -264,8 +264,8 @@ export default function ForecastEPSPERatio() {
                 <LineChart data={data} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="t" tickFormatter={(t) => `${t}a`} />
-                  <YAxis tickFormatter={(v) => `$${fmt(v as number)}`} />
-                  <Tooltip formatter={(v: any) => `$${fmt(v)}`} labelFormatter={(l) => `${l} ans`} />
+                  <YAxis tickFormatter={(v) => `$${fmt(v)}`} />
+                  <Tooltip formatter={(v) => `$${fmt(v)}`} labelFormatter={(l) => `${l} ans`} />
                   <Legend />
                   <Line type="monotone" dataKey="eps" name="EPS projeté" stroke="#111827" strokeWidth={2} dot={false} />
                 </LineChart>
@@ -276,15 +276,15 @@ export default function ForecastEPSPERatio() {
           <div className="bg-white rounded-2xl shadow-sm p-4">
             <div className="flex items-center gap-2 mb-3">
               <BarChart3 size={18} />
-              <h2 className="font-semibold">P/E futur (prix d'entrée constant)</h2>
+              <h2 className="font-semibold">P/E futur (prix d&apos;entrée constant)</h2>
             </div>
             <div className="h-72">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={data} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="t" tickFormatter={(t) => `${t}a`} />
-                  <YAxis tickFormatter={(v) => `${fmt(v as number)}`} />
-                  <Tooltip formatter={(v: any) => fmt(v)} labelFormatter={(l) => `${l} ans`} />
+                  <YAxis tickFormatter={(v) => `${fmt(v)}`} />
+                  <Tooltip formatter={(v) => fmt(v)} labelFormatter={(l) => `${l} ans`} />
                   <Legend />
                   {entryPrices.map((_, idx) => (
                     <Line
@@ -313,7 +313,7 @@ export default function ForecastEPSPERatio() {
           <div className="px-4 py-3 border-b flex items-center justify-between">
             <h3 className="font-semibold">Récapitulatif par horizon</h3>
             <div className="text-xs text-neutral-500">
-              Hypothèse: P/E = Prix d'entrée / EPS projeté
+              Hypothèse: P/E = Prix d&apos;entrée / EPS projeté
             </div>
           </div>
           <div className="overflow-x-auto">
@@ -335,7 +335,7 @@ export default function ForecastEPSPERatio() {
                       <td className="px-4 py-2 font-medium">{row.t} ans</td>
                       <td className="px-4 py-2">${fmt(row.eps)}</td>
                       {entryPrices.map((_, idx) => (
-                        <td key={idx} className="px-4 py-2">{fmt((row as any)[`pe_${idx}`])}</td>
+                        <td key={idx} className="px-4 py-2">{fmt((row)[`pe_${idx}`])}</td>
                       ))}
                     </tr>
                   ))}
@@ -347,9 +347,9 @@ export default function ForecastEPSPERatio() {
         {/* Notes */}
         <section className="mt-6 text-xs text-neutral-500 leading-relaxed">
           <p>
-            ⚠️ Ceci est un outil pédagogique. Les projections dépendent entièrement de l'hypothèse de
-            croissance du EPS et ne constituent pas un conseil d'investissement. Le P/E futur affiché suppose que
-            le prix d'entrée reste constant. Vous pouvez ajouter plusieurs scénarios de prix pour voir la sensibilité.
+            ⚠️ Ceci est un outil pédagogique. Les projections dépendent entièrement de l&apos;hypothèse de
+            croissance du EPS et ne constituent pas un conseil d&apos;investissement. Le P/E futur affiché suppose que
+            le prix d&apos;entrée reste constant. Vous pouvez ajouter plusieurs scénarios de prix pour voir la sensibilité.
           </p>
         </section>
       </div>

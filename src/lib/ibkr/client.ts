@@ -129,25 +129,29 @@ export async function ibkrApiPost(path: string, oauthToken: string) {
 export async function fetchPortfolioBundle(oauthToken: string) {
   const accounts = await ibkrApiGet("/portfolio/accounts", oauthToken);
 
-  const normalizedAccounts = Array.isArray(accounts)
+  const normalizedAccounts: Record<string, unknown>[] | null = Array.isArray(accounts)
     ? accounts
     : Array.isArray(accounts?.accounts)
       ? accounts.accounts
-      : [];
+      : null;
+  if (!normalizedAccounts?.length) throw new Error("IBKR returned no valid accounts; existing portfolio retained");
 
   const accountBundles = await Promise.all(
     normalizedAccounts.map(async (account) => {
       const accountId = String(account.id || account.accountId || account.acctId || "");
       if (!accountId) {
-        return null;
+        throw new Error("IBKR returned an account without an ID");
       }
 
       const [positions, summary, ledger] = await Promise.all([
-        ibkrApiGet(`/portfolio/${accountId}/positions`, oauthToken).catch(() => []),
+        ibkrApiGet(`/portfolio/${accountId}/positions`, oauthToken),
         ibkrApiGet(`/portfolio/${accountId}/summary`, oauthToken).catch(() => ({})),
         ibkrApiGet(`/portfolio/${accountId}/ledger`, oauthToken).catch(() => ({})),
       ]);
 
+      if (!Array.isArray(positions) && !Array.isArray(positions?.positions)) {
+        throw new Error("IBKR returned invalid positions; existing portfolio retained");
+      }
       return {
         accountId,
         positions: Array.isArray(positions)

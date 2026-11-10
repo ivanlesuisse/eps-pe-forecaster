@@ -22,7 +22,7 @@ export function calculateUnrealizedGain(
   buyingPrice: number | null,
   quantity: number | null
 ): number {
-  if (!buyingPrice || !quantity) {
+  if (buyingPrice == null || quantity == null) {
     // If no buying price/quantity, we can't calculate unrealized gains
     return 0;
   }
@@ -39,7 +39,7 @@ export function calculateGainPercentage(
   buyingPrice: number | null,
   quantity: number | null
 ): number {
-  if (!buyingPrice || !quantity) {
+  if (buyingPrice == null || quantity == null) {
     return 0;
   }
 
@@ -64,7 +64,7 @@ export function calculatePortfolioMetrics(assets: AssetWithMetrics[]) {
     totalValue += asset.value;
 
     // Total invested
-    if (asset.buyingPrice && asset.quantity) {
+    if (asset.buyingPrice != null && asset.quantity != null) {
       const cost = asset.buyingPrice * asset.quantity;
       totalInvested += cost;
       totalGain += calculateUnrealizedGain(asset.value, asset.buyingPrice, asset.quantity);

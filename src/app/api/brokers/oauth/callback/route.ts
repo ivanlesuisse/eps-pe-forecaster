@@ -1,3 +1,4 @@
+import { getOrCreateUserByClerkId } from "@/lib/users";
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { encryptToken } from "@/lib/security";
@@ -79,16 +80,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Get or create user
-    let user = await prisma.user.findUnique({
-      where: { clerkId: authResult.userId },
-    });
-
-    if (!user) {
-      user = await prisma.user.create({
-        data: { clerkId: authResult.userId },
-      });
-    }
+    const user = await getOrCreateUserByClerkId(authResult.userId);
 
     // Calculate token expiration (typically 1 hour for access token)
     const expiresAt = new Date(Date.now() + 3600 * 1000); // 1 hour

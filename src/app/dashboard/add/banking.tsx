@@ -29,12 +29,15 @@ export default function AddBankingAssetPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [accountName, setAccountName] = useState("");
   const [balance, setBalance] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const filteredBanks = popularBanks.filter(bank =>
     bank.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleNext = async () => {
+    if (loading) return;
     if (selectedBank && selectedType && balance) {
       setLoading(true);
       setError(null);
@@ -63,7 +66,7 @@ export default function AddBankingAssetPage() {
         const errorMessage = (error as Error).message || "Une erreur est survenue";
         console.error("Error creating asset:", error);
         setError(errorMessage);
-        alert("Erreur: " + errorMessage);
+
       } finally {
         setLoading(false);
       }
@@ -174,6 +177,7 @@ export default function AddBankingAssetPage() {
         </div>
       )}
 
+      {error && <p role="alert" className="mb-4 text-red-400">{error}</p>}
       {/* Action Buttons */}
       <div className="flex gap-4">
         <button
@@ -184,10 +188,10 @@ export default function AddBankingAssetPage() {
         </button>
         <button
           onClick={handleNext}
-          disabled={!isComplete}
+          disabled={!isComplete || loading}
           className="flex-1 px-6 py-3 bg-orange-500 rounded-full text-white font-bold hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Ajouter
+          {loading ? "Ajout en cours…" : "Ajouter"}
         </button>
       </div>
     </div>

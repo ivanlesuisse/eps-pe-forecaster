@@ -1,19 +1,9 @@
 import { prisma } from "@/lib/prisma";
 
 export async function getOrCreateUserByClerkId(clerkId: string) {
-  let user = await prisma.user.findUnique({
+  return prisma.user.upsert({
     where: { clerkId },
+    update: {},
+    create: { clerkId, email: `${clerkId}@clerk.local`, baseCurrency: "CHF" },
   });
-
-  if (!user) {
-    user = await prisma.user.create({
-      data: {
-        clerkId,
-        email: `${clerkId}@clerk.local`,
-        baseCurrency: "CHF",
-      },
-    });
-  }
-
-  return user;
 }

@@ -1,3 +1,4 @@
+import { finiteNumber, optionalNumber, requiredText, InvalidAssetInput } from "@/lib/asset-input";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
@@ -100,16 +101,19 @@ export async function PUT(
     const updatedAsset = await prisma.asset.update({
       where: { id },
       data: {
-        ...(name && { name }),
-        ...(value !== undefined && { value: parseFloat(value) }),
-        ...(quantity !== undefined && { quantity: quantity ? parseFloat(quantity) : null }),
-        ...(buyingPrice !== undefined && { buyingPrice: buyingPrice ? parseFloat(buyingPrice) : null }),
+        ...(name !== undefined && { name: requiredText(name, "name") }),
+        ...(value !== undefined && { value: finiteNumber(value, "value") }),
+        ...(quantity !== undefined && { quantity: optionalNumber(quantity, "quantity") ?? 1 }),
+        ...(buyingPrice !== undefined && { buyingPrice: optionalNumber(buyingPrice, "buyingPrice") }),
         ...(currency && { currency }),
       },
     });
 
     return NextResponse.json(updatedAsset, { status: 200 });
   } catch (error) {
+    if (error instanceof InvalidAssetInput || error instanceof SyntaxError) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
     console.error("Error updating asset:", error);
     return NextResponse.json(
       { error: "Failed to update asset" },
@@ -159,15 +163,10 @@ export async function DELETE(
       );
     }
 
-    // Delete associated transactions first
-    await prisma.transaction.deleteMany({
-      where: { assetId: id },
-    });
-
-    // Delete asset
-    await prisma.asset.delete({
-      where: { id },
-    });
+    await prisma.$transaction([
+      prisma.transaction.deleteMany({ where: { assetId: id } }),
+      prisma.asset.delete({ where: { id } }),
+    ]);
 
     return NextResponse.json(
       { message: "Asset deleted successfully" },
