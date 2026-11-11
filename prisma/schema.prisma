@@ -21,6 +21,10 @@ model User {
   baseCurrency  String   @default("CHF")
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+  monthlyIncome Float @default(0)
+  monthlyExpenses Float @default(0)
+  goals Goal[]
+  snapshots WealthSnapshot[]
   assets        Asset[]
   brokerTokens  BrokerToken[]
   auditLogs     AuditLog[]
@@ -69,7 +73,13 @@ model Asset {
   logo          String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+  fxRate Float?
+  annualFeePercent Float @default(0)
+  monthlyIncome Float @default(0)
+  notes String?
   transactions  Transaction[]
+
+  @@index([userId])
 }
 
 model Transaction {
@@ -80,4 +90,27 @@ model Transaction {
   amount    Float
   price     Float
   date      DateTime @default(now())
+}
+
+model Goal {
+  id String @id @default(uuid())
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name String
+  targetAmount Float
+  currentAmount Float @default(0)
+  monthlySaving Float @default(0)
+  deadline DateTime
+  createdAt DateTime @default(now())
+  @@index([userId])
+}
+model WealthSnapshot {
+  id String @id @default(uuid())
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  day String
+  gross Float
+  debt Float
+  net Float
+  @@unique([userId, day])
 }

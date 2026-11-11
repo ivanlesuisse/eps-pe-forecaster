@@ -1,16 +1,16 @@
 import Sidebar from "@/components/Sidebar";
-
+import { WealthProvider } from "@/components/WealthProvider";
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-screen bg-black">
-      <Sidebar />
-      <main className="flex-grow ml-64 p-8">
-        {children}
-      </main>
-    </div>
+    <WealthProvider>
+      <div className="wealth-shell">
+        <Sidebar />
+        <main className="wealth-main">{children}</main>
+      </div>
+    </WealthProvider>
   );
 }

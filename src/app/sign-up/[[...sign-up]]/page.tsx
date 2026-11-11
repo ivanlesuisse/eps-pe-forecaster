@@ -1,5 +1,3 @@
 import { SignUp } from "@clerk/nextjs";
-
-export default function Page() {
-  return <SignUp forceRedirectUrl="/dashboard" />;
-}
+import Link from "next/link";
+export default function Page(){return <main className="auth-page"><div className="auth-box"><Link href="/" className="brand"><span>F</span>FinTrack <small>CH</small></Link><p>Votre patrimoine vous appartient. Créez votre espace personnel pour suivre vos actifs et vos projets.</p><SignUp routing="path" path="/sign-up" forceRedirectUrl="/dashboard" signInUrl="/sign-in"/><Link className="text-link" href="/sign-in">Déjà un compte ? Se connecter</Link><Link className="muted" href="/demo">Découvrir la démonstration sans compte</Link></div></main>;}

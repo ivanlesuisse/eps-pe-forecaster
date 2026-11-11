@@ -8,8 +8,9 @@
     "start": "next start",
     "lint": "eslint",
     "test": "node --test tests/*.test.cjs",
-    "vercel-build": "prisma generate && prisma migrate deploy && next build",
-    "db:migrate": "prisma migrate deploy"
+    "vercel-build": "prisma generate && prisma migrate deploy && npm run verify:database && next build",
+    "db:migrate": "prisma migrate deploy",
+    "verify:database": "node scripts/verify-database.cjs"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.38.1",

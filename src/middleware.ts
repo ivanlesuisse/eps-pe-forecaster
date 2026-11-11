@@ -1,9 +1,13 @@
+import { NextResponse } from "next/server";
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
-const isPublicRoute = createRouteMatcher(['/', '/sign-in(.*)', '/sign-up(.*)']);
+const isPublicRoute = createRouteMatcher(['/', '/demo', '/privacy', '/sign-in(.*)', '/sign-up(.*)']);
 
 export default clerkMiddleware(async (auth, request) => {
-  if (!isPublicRoute(request)) {
+  if (request.nextUrl.pathname.startsWith("/api/")) {
+    const {userId}=await auth();
+    if(!userId) return NextResponse.json({error:"Connectez-vous pour continuer."},{status:401});
+  } else if (!isPublicRoute(request)) {
     await auth.protect();
   }
 });

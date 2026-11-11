@@ -12,14 +12,14 @@ export default function Home() {
         <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-8 backdrop-blur-sm md:p-12">
           <AnimatedHero />
           <p className="mx-auto mt-14 max-w-3xl text-center text-lg leading-relaxed text-blue-100/75">
-            Agregez vos comptes, investissements et actifs reels dans une vue unique, claire et actionnable.
+            Comptes, investissements, immobilier et prévoyance : retrouvez votre patrimoine dans un espace personnel, conçu pour vos projets.
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
             <Link
               href="/sign-up"
               className="rounded-xl bg-sky-500 px-7 py-3 font-semibold text-white transition-colors hover:bg-sky-400"
             >
-              Creer un compte
+              Créer un compte
             </Link>
             <Link
               href="/sign-in"
@@ -27,23 +27,24 @@ export default function Home() {
             >
               Se connecter
             </Link>
+            <Link href="/demo" className="text-emerald-300 px-4 py-3 text-sm">Explorer une démo →</Link>
           </div>
         </div>
 
         <div className="mt-8 grid gap-4 md:grid-cols-3">
           <div className="rounded-2xl border border-white/10 bg-black/30 p-5">
             <ChartSpline className="mb-3 text-sky-300" />
-            <h3 className="mb-2 text-lg font-semibold text-white">Vue consolidee</h3>
-            <p className="text-sm text-zinc-300">Suivez vos actions, ETF, crypto et liquidites en temps reel.</p>
+            <h3 className="mb-2 text-lg font-semibold text-white">Vue consolidée</h3>
+            <p className="text-sm text-zinc-300">Suivez vos actifs, vos dettes et vos valorisations manuelles en CHF.</p>
           </div>
           <div className="rounded-2xl border border-white/10 bg-black/30 p-5">
             <Layers className="mb-3 text-emerald-300" />
-            <h3 className="mb-2 text-lg font-semibold text-white">Categories intelligentes</h3>
-            <p className="text-sm text-zinc-300">Organisez immobilier, metaux, startups et autres actifs facilement.</p>
+            <h3 className="mb-2 text-lg font-semibold text-white">Catégories intelligentes</h3>
+            <p className="text-sm text-zinc-300">Actions, ETF, crypto, immobilier, piliers 2 et 3a : votre patrimoine au complet.</p>
           </div>
           <div className="rounded-2xl border border-white/10 bg-black/30 p-5">
             <ShieldCheck className="mb-3 text-orange-300" />
-            <h3 className="mb-2 text-lg font-semibold text-white">Acces securise</h3>
+            <h3 className="mb-2 text-lg font-semibold text-white">Accès sécurisé</h3>
             <p className="text-sm text-zinc-300">Authentification robuste et espace personnel protege par defaut.</p>
           </div>
         </div>

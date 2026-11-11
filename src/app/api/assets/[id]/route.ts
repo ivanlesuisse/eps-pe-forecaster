@@ -1,182 +1,60 @@
-import { finiteNumber, optionalNumber, requiredText, InvalidAssetInput } from "@/lib/asset-input";
+import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { auth } from "@clerk/nextjs/server";
-import { NextRequest, NextResponse } from "next/server";
-
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+import { account, unauthorized, apiError, sameOrigin } from "@/lib/api";
+import { assetInput } from "@/lib/wealth-validation";
+type Context = { params: Promise<{ id: string }> };
+const missing = () =>
+  NextResponse.json({ error: "Actif introuvable." }, { status: 404 });
+export async function GET(_r: Request, { params }: Context) {
   try {
+    const user = await account();
+    if (!user) return unauthorized();
     const { id } = await params;
-    const { userId } = await auth();
-
-    if (!userId) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
-    }
-
-    const user = await prisma.user.findUnique({
-      where: { clerkId: userId },
-    });
-
-    if (!user) {
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
-      );
-    }
-
     const asset = await prisma.asset.findFirst({
-      where: {
-        id,
-        userId: user.id,
-      },
-      include: { transactions: true },
+      where: { id, userId: user.id },
     });
-
-    if (!asset) {
-      return NextResponse.json(
-        { error: "Asset not found" },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json(asset, { status: 200 });
-  } catch (error) {
-    console.error("Error fetching asset:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch asset" },
-      { status: 500 }
-    );
+    return asset ? NextResponse.json(asset) : missing();
+  } catch (e) {
+    return apiError(e);
   }
 }
-
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PUT(request: Request, { params }: Context) {
   try {
+    sameOrigin(request);
+    const user = await account();
+    if (!user) return unauthorized();
     const { id } = await params;
-    const { userId } = await auth();
-
-    if (!userId) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
-    }
-
-    const user = await prisma.user.findUnique({
-      where: { clerkId: userId },
+    const existing = await prisma.asset.findFirst({
+      where: { id, userId: user.id },
     });
-
-    if (!user) {
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
-      );
-    }
-
-    // Verify ownership
-    const existingAsset = await prisma.asset.findFirst({
-      where: {
-        id,
-        userId: user.id,
-      },
+    if (!existing) return missing();
+    const data = assetInput({ ...existing, ...(await request.json()) });
+    const result = await prisma.asset.updateMany({
+      where: { id, userId: user.id },
+      data,
     });
-
-    if (!existingAsset) {
-      return NextResponse.json(
-        { error: "Asset not found" },
-        { status: 404 }
-      );
-    }
-
-    const body = await request.json();
-    const { name, value, quantity, buyingPrice, currency } = body;
-
-    const updatedAsset = await prisma.asset.update({
-      where: { id },
-      data: {
-        ...(name !== undefined && { name: requiredText(name, "name") }),
-        ...(value !== undefined && { value: finiteNumber(value, "value") }),
-        ...(quantity !== undefined && { quantity: optionalNumber(quantity, "quantity") ?? 1 }),
-        ...(buyingPrice !== undefined && { buyingPrice: optionalNumber(buyingPrice, "buyingPrice") }),
-        ...(currency && { currency }),
-      },
-    });
-
-    return NextResponse.json(updatedAsset, { status: 200 });
-  } catch (error) {
-    if (error instanceof InvalidAssetInput || error instanceof SyntaxError) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
-    }
-    console.error("Error updating asset:", error);
-    return NextResponse.json(
-      { error: "Failed to update asset" },
-      { status: 500 }
-    );
+    return result.count ? NextResponse.json({ id, ...data }) : missing();
+  } catch (e) {
+    return apiError(e);
   }
 }
-
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function DELETE(request: Request, { params }: Context) {
   try {
+    sameOrigin(request);
+    const user = await account();
+    if (!user) return unauthorized();
     const { id } = await params;
-    const { userId } = await auth();
-
-    if (!userId) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
-    }
-
-    const user = await prisma.user.findUnique({
-      where: { clerkId: userId },
+    const result = await prisma.$transaction(async (tx) => {
+      const asset = await tx.asset.findFirst({
+        where: { id, userId: user.id },
+      });
+      if (!asset) return false;
+      await tx.transaction.deleteMany({ where: { assetId: id } });
+      await tx.asset.deleteMany({ where: { id, userId: user.id } });
+      return true;
     });
-
-    if (!user) {
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
-      );
-    }
-
-    // Verify ownership
-    const existingAsset = await prisma.asset.findFirst({
-      where: {
-        id,
-        userId: user.id,
-      },
-    });
-
-    if (!existingAsset) {
-      return NextResponse.json(
-        { error: "Asset not found" },
-        { status: 404 }
-      );
-    }
-
-    await prisma.$transaction([
-      prisma.transaction.deleteMany({ where: { assetId: id } }),
-      prisma.asset.delete({ where: { id } }),
-    ]);
-
-    return NextResponse.json(
-      { message: "Asset deleted successfully" },
-      { status: 200 }
-    );
-  } catch (error) {
-    console.error("Error deleting asset:", error);
-    return NextResponse.json(
-      { error: "Failed to delete asset" },
-      { status: 500 }
-    );
+    return result ? NextResponse.json({ deleted: true }) : missing();
+  } catch (e) {
+    return apiError(e);
   }
 }
