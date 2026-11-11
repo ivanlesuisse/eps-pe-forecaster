@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Loader2, RefreshCw, ShieldCheck, Unplug } from "lucide-react";
@@ -14,6 +14,14 @@ type ConnectionStatus = {
 };
 
 export default function IBKRPage() {
+  return (
+    <Suspense fallback={<div role="status" className="p-6 text-zinc-400">Chargement du statut IBKR...</div>}>
+      <IBKRContent />
+    </Suspense>
+  );
+}
+
+function IBKRContent() {
   const params = useSearchParams();
   const [status, setStatus] = useState<ConnectionStatus | null>(null);
   const [loadingStatus, setLoadingStatus] = useState(true);
